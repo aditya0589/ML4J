@@ -81,4 +81,26 @@ public class DataFrame {
             return val; // keep as String if not numeric
         }
     }
+
+    public static DataFrame head() {
+        // returns the first 5 rows of all the columns in the dataframe
+        // answer is of type mlcore.dataframe.DataFrame
+    }
+
+    public static DataFrame getColumn(String columnName) {
+        //returns the column with the specified column name
+        // returns not found error if column is not present
+        // returns answer of type mlcore.dataframe.DataFrame
+
+    }
+    public static DataFrame getColumn(List<String> columnNames) {
+        //returns the columns with the specified column names in the list
+        // returns not found error if column is not present
+        // returns answer of type mlcore.dataframe.DataFrame
+
+    }
+    public static Map<String, Map<String, Double>> getStats() {
+        // returns stats like mean, median, mode, count, std, variance, 
+        //Q1, Q2, Q3 etc
+    }
 }
