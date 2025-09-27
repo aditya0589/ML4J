@@ -103,4 +103,21 @@ public class DataFrame {
         // returns stats like mean, median, mode, count, std, variance, 
         //Q1, Q2, Q3 etc
     }
+
+    public static void display() {
+        // Display the mlcore dataframe like a pandas dataframe
+        /*
+         * ex: input type: mlcore.dataframe.DataFrame
+         * Name → ["Alice", "Bob", "Charlie"]
+           Age  → [25, 30, 28]
+           Salary → [50000, 60000, 55000]
+         * 
+         * output:
+         *    Name     Age   Salary
+           0  Alice    25    50000
+           1  Bob      30    60000
+           2  Charlie  28    55000
+         * 
+         */
+    }
 }
