@@ -108,15 +108,15 @@ public class DataFrame {
         // Display the mlcore dataframe like a pandas dataframe
         /*
          * ex: input type: mlcore.dataframe.DataFrame
-         * Name → ["Alice", "Bob", "Charlie"]
+         * Name → ["Hitler", "Georing", "keitel"]
            Age  → [25, 30, 28]
            Salary → [50000, 60000, 55000]
          * 
          * output:
          *    Name     Age   Salary
-           0  Alice    25    50000
-           1  Bob      30    60000
-           2  Charlie  28    55000
+           0  Hitler    25    50000
+           1  Georing   30    60000
+           2  Keitel    28    55000
          * 
          */
     }
