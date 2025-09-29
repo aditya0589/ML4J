@@ -122,12 +122,7 @@ public class DataFrame {
         }
         return new DataFrame(listColumns);
     }
-
-    public static Map<String, Map<String, Double>> getStats() {
-        // returns stats like mean, median, mode, count, std, variance, 
-        //Q1, Q2, Q3 etc
-    }
-
+    
     public void display() {
         List<String> headers = new ArrayList<>(this.data.keySet());
         System.out.print("Index\t");
@@ -151,3 +146,4 @@ public class DataFrame {
         }
     }
 }
+
