@@ -82,26 +82,61 @@ public class DataFrame {
         }
     }
 
-    public static DataFrame head() {
+    public DataFrame head() {
         // returns the first 5 rows of all the columns in the dataframe
         // answer is of type mlcore.dataframe.DataFrame
+        Map<String, List<Object>> df = new LinkedHashMap<>();
+        Map<String, List<Object>> newdf = new LinkedHashMap<>();
+        int rowLimit = Math.min(5, this.getCountRows());
+        
+        for(Map.Entry<String, List<Object>> entry: this.getData().entrySet()) {
+            List<Object> colValues = entry.getValue();
+            List<Object> headValues = new ArrayList<>();
+
+            for(int i = 0; i < rowLimit; i++) {
+                headValues.add(colValues.get(i));
+
+            }
+            newdf.put(entry.getKey(), headValues);
+
+        }
+        DataFrame df1 = new DataFrame(newdf);
+        return df1;
+
     }
 
-    public static DataFrame getColumn(String columnName) {
+    public DataFrame getColumn(String columnName) {
         //returns the column with the specified column name
         // returns not found error if column is not present
         // returns answer of type mlcore.dataframe.DataFrame
+        Map<String, List<Object>> df = new LinkedHashMap<>();
+        if(!data.containsKey(columnName)) {
+            throw new IllegalArgumentException("Key not found in dataframe");
+        }
+        else {
+            List<Object> values = data.get(columnName);
+            df.put(columnName, values);
+        }
+        DataFrame df1 = new DataFrame(df);
+        return df1;
 
     }
-    public static DataFrame getColumn(List<String> columnNames) {
+    public DataFrame getColumn(String[] columnNames) {
         //returns the columns with the specified column names in the list
         // returns not found error if column is not present
         // returns answer of type mlcore.dataframe.DataFrame
+        Map<String, List<Object>> map = new LinkedHashMap<>();
+        for(String name: columnNames) {
+            if(!data.containsKey(name)) {
+                throw new IllegalArgumentException("Column "+name + "is not in Dataframe");  
+            } else {
+                List<Object> values = data.get(name);
+                map.put(name, values);
+            }
+        }
+        DataFrame df = new DataFrame(map);
+        return df;
 
-    }
-    public static Map<String, Map<String, Double>> getStats() {
-        // returns stats like mean, median, mode, count, std, variance, 
-        //Q1, Q2, Q3 etc
     }
 
     public static void display() {
@@ -120,4 +155,5 @@ public class DataFrame {
          * 
          */
     }
+
 }
