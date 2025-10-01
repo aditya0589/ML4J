@@ -21,5 +21,20 @@ public class Main {
 
         DataFrame df2 = DataFrame.readCSV("C:/Aditya/Computer Science/Machine Learning/Datasets/cars-data.csv", ",");
         System.out.println(df2.getData());
+
+        DataFrame df3 = df2.withColumn("values", Arrays.asList(1,2,3,4,5,6));
+        System.out.println("df3:");
+        df3.display();
+
+        data = new HashMap<>();
+        DataFrame example = new DataFrame(data);
+        DataFrame df4 = example.withColumn("values", Arrays.asList(1,2,3,44,55,66));
+        df4.display();
+
+        DataFrame df5 = df4.withColumnReplaced("values", "numbers", Arrays.asList(1,2,3,4,5,6,7));
+        df5.display();
+
+        DataFrame df6 = df5.head().mergeDataFrameColumns(df4.head());
+        df6.display();
     }
 }

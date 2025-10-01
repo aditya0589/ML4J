@@ -1,4 +1,4 @@
-package mlcore.models;
+package models;
 
 
 public class DecisionTree {

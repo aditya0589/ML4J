@@ -6,22 +6,22 @@ import java.io.IOException;
 import java.util.*;
 
 public class DataFrame {
-    private Map<String, List<Object>> data;
-    private Map<String, String> columnTypes;
+    protected Map<String, List<Object>> data;
+    //protected Map<String, String> columnTypes;
     
-    private int nRows;
-    private int nCols;
+    protected int nRows;
+    protected int nCols;
 
     public DataFrame() {
         this.data = new HashMap<>();
-        this.columnTypes = new HashMap<>();
+        //this.columnTypes = new HashMap<>();
         this.nRows = 0;
         this.nCols = 0;
     }
 
     public DataFrame(Map<String, List<Object>> inputData) {
         this.data = new HashMap<>(inputData);
-        this.columnTypes = new HashMap<>();
+        //this.columnTypes = new HashMap<>();
 
         if (!inputData.isEmpty()) {
             this.nCols = inputData.size();
@@ -145,5 +145,76 @@ public class DataFrame {
             System.out.println();
         }
     }
+
+    public DataFrame withColumn(String name, List<Object> values) {
+        data.put(name, values);
+        DataFrame df = new DataFrame(data);
+        return df;
+    }
+
+    public void InPlaceRemoveColumn(String columnName) {
+        if(!data.containsKey(columnName)) {
+            throw new IllegalArgumentException("Column is not found in the dataframe");
+        } else {
+            data.remove(columnName);
+        }
+    }
+
+    public DataFrame dropColumn(String columnName) {
+        if(!data.containsKey(columnName)) {
+            throw new IllegalArgumentException("Column name not found in dataframe");
+        } else {
+            Map<String, List<Object>> newData = new LinkedHashMap<>(data);
+            newData.remove(columnName);
+            return new DataFrame(newData);
+        }
+    }
+    public DataFrame withColumnReplaced(String oldColumn, String newColumn, List<Object> values) {
+        if (!data.containsKey(oldColumn)) {
+            throw new IllegalArgumentException("Column name not found in dataframe: " + oldColumn);
+        }
+        DataFrame df = new DataFrame(new HashMap<>(this.data));
+
+        df.data.remove(oldColumn);
+
+        df.data.put(newColumn, values);
+
+        return df;
+    }
+
+    public DataFrame mergeDataFrameColumns(DataFrame other) {
+        int rowCount = this.data.values().iterator().next().size();
+        int otherRowCount = other.data.values().iterator().next().size();
+        if (rowCount != otherRowCount) {
+            throw new IllegalArgumentException("Row counts must match for column-wise merge.");
+        }
+
+        Map<String, List<Object>> merged = new LinkedHashMap<>(this.data);
+
+        for (Map.Entry<String, List<Object>> entry : other.data.entrySet()) {
+            if (merged.containsKey(entry.getKey())) {
+                throw new IllegalArgumentException("Duplicate column: " + entry.getKey());
+            }
+            merged.put(entry.getKey(), entry.getValue());
+        }
+
+        return new DataFrame(merged);
+    }
+
+    public DataFrame mergeDataFrameRows(DataFrame other) {
+        if (!this.data.keySet().equals(other.data.keySet())) {
+            throw new IllegalArgumentException("Columns must match for row-wise merge.");
+        }
+
+        Map<String, List<Object>> merged = new LinkedHashMap<>();
+            for (String col : this.data.keySet()) {
+            List<Object> combined = new ArrayList<>(this.data.get(col));
+            combined.addAll(other.data.get(col));
+            merged.put(col, combined);
+        }
+
+        return new DataFrame(merged);
+    }
+
 }
 
