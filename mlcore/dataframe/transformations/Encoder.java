@@ -3,9 +3,10 @@ package mlcore.dataframe.transformations;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import mlcore.dataframe.DataFrame;
 
 public class Encoder {
@@ -54,6 +55,40 @@ public class Encoder {
         }
 
         return new DataFrame(labelEncoded);
+    }
+
+    public DataFrame oneHotEncoding(DataFrame df, String columnName) {
+        List<Object> values = df.getColumn(columnName).getData().get(columnName);
+        Set<Object> unique = new LinkedHashSet<>(values);
+        List<Object> categories = new ArrayList<>(unique);
+
+        Map<Object, Integer> categoryIndexMap = new HashMap<>();
+        for(int i = 0; i < categories.size(); i++) {
+            categoryIndexMap.put(categories.get(i), i);
+        }
+
+        Map<String, List<Object>> onehotColumns = new LinkedHashMap<>();
+        for(Object category: categories) {
+            List<Object> colList = new ArrayList<>();
+
+            for (Object value : values) {
+                colList.add(0);
+            }
+            onehotColumns.put(columnName + "_" +category.toString(), colList);
+        }
+        for (int i = 0; i < values.size(); i++) {
+            Object val = values.get(i);
+            String colName = columnName + "_" + val.toString();
+            onehotColumns.get(colName).set(i, 1);
+        }
+
+        DataFrame newdf = new DataFrame(new LinkedHashMap<>(df.getData()));
+        for (Map.Entry<String, List<Object>> entry : onehotColumns.entrySet()) {
+            newdf.withColumn(entry.getKey(), entry.getValue());
+        }
+        newdf.dropColumn(columnName);
+
+        return newdf;
     }
     
 }
