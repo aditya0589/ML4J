@@ -1,5 +1,7 @@
+import java.util.Map;
 import mlcore.dataframe.DataFrame;
 import mlcore.dataframe.transformations.Encoder;
+import mlcore.dataframe.utils.StatsUtils;
 
 public class Main {
     public static void main(String[] args) {
@@ -38,6 +40,15 @@ public class Main {
         Encoder e = new Encoder();
         DataFrame df3 = e.oneHotEncoding(df2, "Model");
         System.out.println(df3.head().getData());
+
+        StatsUtils u = new StatsUtils();
+        Map<Object, Integer> map = u.valueCounts(df3,"Model");
+        System.out.println("Stats 1");
+        System.out.println(map);
+        Double d = u.maximumValue(df3, "Model");
+        System.out.println(d);
+
+
 
     }
 }

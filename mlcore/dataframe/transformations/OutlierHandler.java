@@ -11,5 +11,7 @@ public class OutlierHandler {
         Double iqr = Q3 - Q1;
         return iqr;
     }
-    
+    public DataFrame RemoveOutliers(DataFrame df) {
+        // takes a dataframe as input, returns a new dataframe with all outliers removed
+    }
 }
