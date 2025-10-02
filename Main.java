@@ -2,6 +2,7 @@ import java.util.Map;
 import mlcore.dataframe.DataFrame;
 import mlcore.dataframe.transformations.Encoder;
 import mlcore.dataframe.utils.StatsUtils;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -36,18 +37,22 @@ public class Main {
         // DataFrame df6 = df5.head().mergeDataFrameColumns(df4.head());
         // df6.display();
 
-        df2.head().display();
+        // df2.head().display();
+        // Encoder e = new Encoder();
+        // DataFrame df3 = e.oneHotEncoding(df2, "Model");
+        // System.out.println(df3.head().getData());
+
+        // StatsUtils u = new StatsUtils();
+        // Map<Object, Integer> map = u.valueCounts(df3,"Model");
+        // System.out.println("Stats 1");
+        // System.out.println(map);
+        // Double d = u.maximumValue(df3, "Model");
+        // System.out.println(d);
+
         Encoder e = new Encoder();
-        DataFrame df3 = e.oneHotEncoding(df2, "Model");
-        System.out.println(df3.head().getData());
-
-        StatsUtils u = new StatsUtils();
-        Map<Object, Integer> map = u.valueCounts(df3,"Model");
-        System.out.println("Stats 1");
-        System.out.println(map);
-        Double d = u.maximumValue(df3, "Model");
-        System.out.println(d);
-
+        DataFrame df3 = e.oneHotEncoding(df2, Arrays.asList("Model", "Car"));
+        System.out.println("Model Encoding");
+        System.out.println(df3.getData());
 
 
     }

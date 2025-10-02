@@ -1,6 +1,7 @@
 package mlcore.dataframe.transformations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -91,4 +92,53 @@ public class Encoder {
         return newdf;
     }
     
+    public DataFrame oneHotEncoding(DataFrame df, List<String> columnNames) {
+    // Make a copy of the passed DataFrame
+        DataFrame newdf = new DataFrame(new LinkedHashMap<>(df.getData()));
+
+    // Loop through each column that needs encoding
+        for (String columnName : columnNames) {
+            if (!newdf.getData().containsKey(columnName)) {
+                throw new IllegalArgumentException("Column " + columnName + " not found in DataFrame");
+            }
+
+        // Step 1: Get all values of the column
+            List<Object> values = newdf.getData().get(columnName);
+
+        // Step 2: Get unique categories
+            Set<Object> unique = new LinkedHashSet<>(values);
+            List<Object> categories = new ArrayList<>(unique);
+
+        // Step 3: Create one-hot columns
+            Map<String, List<Object>> onehotColumns = new LinkedHashMap<>();
+            int rowCount = values.size();
+
+            for (Object category : categories) {
+                String newColName = columnName + "_" + category.toString().replaceAll("\\s+", "_");
+                List<Object> colData = new ArrayList<>(Collections.nCopies(rowCount, 0));
+                onehotColumns.put(newColName, colData);
+            }
+
+        // Step 4: Fill rows with 1 where category matches
+            for (int i = 0; i < rowCount; i++) {
+                Object val = values.get(i);
+                String colName = columnName + "_" + val.toString().replaceAll("\\s+", "_");
+
+                if (onehotColumns.containsKey(colName)) {
+                    onehotColumns.get(colName).set(i, 1);
+                }
+            }
+
+        // Step 5: Add new columns to DataFrame
+            for (Map.Entry<String, List<Object>> entry : onehotColumns.entrySet()) {
+                newdf.withColumn(entry.getKey(), entry.getValue());
+            }
+
+        // Step 6: Remove original categorical column
+            newdf.dropColumn(columnName);
+        }
+
+        return newdf;
+    }
+
 }
