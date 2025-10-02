@@ -3,15 +3,16 @@ import mlcore.dataframe.DataFrame;
 import mlcore.dataframe.transformations.Encoder;
 import mlcore.dataframe.utils.StatsUtils;
 import java.util.*;
+import mlcore.dataframe.transformations.OutlierHandler;
 
 public class Main {
     public static void main(String[] args) {
-        // Map<String, List<Object>> data = new HashMap<>();
-        // data.put("Name", Arrays.asList("Alice", "Bob", "Charlie"));
-        // data.put("Age", Arrays.asList(21, 22, 23));
-        // data.put("City", Arrays.asList("NY", "LA", "Chicago"));
+        Map<String, List<Object>> data = new HashMap<>();
+        data.put("Name", Arrays.asList("Alice", "Bob", "Charlie", "Hitler"));
+        data.put("Age", Arrays.asList(1000, 22, 23, 2));
+        data.put("City", Arrays.asList("NY", "LA", "Chicago", "Berlin"));
 
-        // DataFrame df = new DataFrame(data);
+        DataFrame df = new DataFrame(data);
         // int rows = df.getCountRows();
         // int cols = df.getCountCols();
         // System.out.println(df);
@@ -19,8 +20,8 @@ public class Main {
         // System.out.println(cols);
         // System.out.println(df.getData());
 
-        DataFrame df2 = DataFrame.readCSV("C:/Aditya/Computer Science/Machine Learning/Datasets/cars-data.csv", ",");
-        System.out.println(df2.getData());
+        //DataFrame df2 = DataFrame.readCSV("C:/Aditya/Computer Science/Machine Learning/Datasets/cars-data.csv", ",");
+        // System.out.println(df2.getData());
 
         // DataFrame df3 = df2.withColumn("values", Arrays.asList(1,2,3,4,5,6));
         // System.out.println("df3:");
@@ -50,10 +51,12 @@ public class Main {
         // System.out.println(d);
 
         Encoder e = new Encoder();
-        DataFrame df3 = e.oneHotEncoding(df2, Arrays.asList("Model", "Car"));
-        System.out.println("Model Encoding");
-        System.out.println(df3.getData());
-
-
+        //DataFrame df3 = e.oneHotEncoding(df, Arrays.asList("Model", "Car"));
+        // System.out.println("Model Encoding");
+        // System.out.println(df3.getData());
+        System.out.println("Original Count: " + df.getCountRows());
+        OutlierHandler o = new OutlierHandler();
+        DataFrame df4 = o.RemoveOutliers(df, "Age");
+        System.out.println(df4.getColumn("Age").getData());
     }
 }
