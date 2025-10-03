@@ -66,7 +66,6 @@ public class DataFrame {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
         }
         return new DataFrame(csvData);
     }

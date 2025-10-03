@@ -2,6 +2,7 @@ package mlcore.dataframe.transformations;
 
 import java.util.*;
 import mlcore.dataframe.DataFrame;
+import mlcore.dataframe.utils.*;
 
 public class NullHandler {
     // This class contains methods to handle null values in the dataset
@@ -59,14 +60,79 @@ public class NullHandler {
 
     }
 
-    public DataFrame FillNullsWithMeasure(DataFrame df, String columnName, String measureInLowerCase) {
-        // fill the null values of a perticular column with a specified measure of central tendency
-        // takes a dataframe and returns a dataframe
+    public DataFrame fillNullsWithMeasure(DataFrame df, String columnName, String measureInLowerCase) {
+        List<Object> column = df.getData().get(columnName);
+        StatsUtils u = new StatsUtils();
+
+        if ("mean".equals(measureInLowerCase)) {
+            double sum = 0;
+            int count = 0;
+
+            for (Object val : column) {
+                if (val != null) {
+                    sum += Double.valueOf(val.toString());
+                    count++;
+                }
+            }
+            double mean = sum / count;
+            return ReplaceNullsWithValue(df, columnName, mean);
+        }
+
+        if ("median".equals(measureInLowerCase)) {
+            double median = u.medianColumn(df, columnName);
+            return ReplaceNullsWithValue(df, columnName, median);
+        }
+
+        if ("mode".equals(measureInLowerCase)) {
+            Object mode = u.modeColumn(df, columnName);
+            return ReplaceNullsWithValue(df, columnName, mode);
+        }
+
+    // If measure is not recognized, return original DataFrame or throw exception
+        throw new IllegalArgumentException("Unsupported measure: " + measureInLowerCase);
     }
 
-    public DataFrame FillNullsWithMeasure(DataFrame df, List<String> columnNames, String measureInLowercase) {
-        // fill the null values of a perticular column with a specified measure of central tendency
-        // takes a dataframes and returns a dataframe
+
+    public DataFrame fillNullsWithMeasure(DataFrame df, List<String> columnNames, String measureInLowerCase) {
+        DataFrame newDf = new DataFrame(new LinkedHashMap<>(df.getData())); // make a copy
+        StatsUtils u = new StatsUtils();
+
+        for (String columnName : columnNames) {
+            List<Object> column = newDf.getData().get(columnName);
+
+            if (column == null) {
+                throw new IllegalArgumentException("Column " + columnName + " not found");
+            }
+
+            if (null == measureInLowerCase) {
+                throw new IllegalArgumentException("Unsupported measure: " + measureInLowerCase);
+            }
+
+            else switch (measureInLowerCase) {
+                case "mean" -> {
+                    double sum = 0;
+                    int count = 0;
+                    for (Object val : column) {
+                        if (val != null) {
+                            sum += Double.valueOf(val.toString());
+                            count++;
+                        }
+                    }   double mean = sum / count;
+                    newDf = ReplaceNullsWithValue(newDf, columnName, mean);
+                }
+                case "median" -> {
+                    double median = u.medianColumn(newDf, columnName);
+                    newDf = ReplaceNullsWithValue(newDf, columnName, median);
+                }
+                case "mode" -> {
+                    Object mode = u.modeColumn(newDf, columnName);
+                    newDf = ReplaceNullsWithValue(newDf, columnName, mode);
+                }
+                default -> throw new IllegalArgumentException("Unsupported measure: " + measureInLowerCase);
+            }
+        }
+
+        return newDf;
     }
 
 }

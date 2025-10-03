@@ -1,9 +1,8 @@
 package mlcore.dataframe.transformations;
 
+import java.util.*;
 import mlcore.dataframe.DataFrame;
 import mlcore.dataframe.utils.StatsUtils;
-
-import java.util.*;
 
 public class OutlierHandler {
 
@@ -30,7 +29,7 @@ public class OutlierHandler {
 
             double variance = 0;
             for (Object val : values) {
-                double v = Double.valueOf(val.toString());
+                double v = Double.parseDouble(val.toString());
                 variance += Math.pow(v - mean, 2);
             }
             variance = variance / n;
@@ -98,7 +97,7 @@ public class OutlierHandler {
 
                     double variance = 0;
                     for (Object val : values) {
-                        double v = Double.valueOf(val.toString());
+                        double v = Double.parseDouble(val.toString());
                         variance += Math.pow(v - mean, 2);
                     }
                     variance = variance / n;
