@@ -8,6 +8,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.crypto.Data;
+
 import mlcore.dataframe.DataFrame;
 
 public class Encoder {
@@ -129,5 +132,101 @@ public class Encoder {
         }
         return newdf;
     }
+
+    public DataFrame targetEncoding(DataFrame df, String categoricalColumn, String targetColumn) {
+        Map<String, List<Object>> data = new LinkedHashMap<>(df.getData());
+
+        if (!data.containsKey(categoricalColumn) || !data.containsKey(targetColumn)) {
+            throw new IllegalArgumentException("Column not found in DataFrame");
+        }
+
+        List<Object> categories = data.get(categoricalColumn);
+        List<Object> targets = data.get(targetColumn);
+
+        Map<Object, Double> sumMap = new HashMap<>();
+        Map<Object, Integer> countMap = new HashMap<>();
+
+        for (int i = 0; i < categories.size(); i++) {
+            Object category = categories.get(i);
+            double targetValue = Double.valueOf(targets.get(i).toString());
+
+            sumMap.put(category, sumMap.getOrDefault(category, 0.0) + targetValue);
+            countMap.put(category, countMap.getOrDefault(category, 0) + 1);
+        }
+
+        Map<Object, Double> meanMap = new HashMap<>();
+        for (Object category : sumMap.keySet()) {
+            double mean = sumMap.get(category) / countMap.get(category);
+            meanMap.put(category, mean);
+        }
+
+        List<Object> encodedColumn = new ArrayList<>();
+        for (Object category : categories) {
+            encodedColumn.add(meanMap.get(category));
+        }
+
+        Map<String, List<Object>> encodedData = new LinkedHashMap<>(data);
+        encodedData.remove(categoricalColumn);
+        encodedData.put(categoricalColumn + "_TargetEncoded", encodedColumn);
+
+        return new DataFrame(encodedData);
+    }
+
+    public DataFrame targetEncoding(DataFrame df, List<String> categoricalColumns, String targetColumn) {
+        // Step 1: Copy the data from DataFrame
+        Map<String, List<Object>> data = new LinkedHashMap<>(df.getData());
+
+        // Step 2: Check if target column exists
+        if (!data.containsKey(targetColumn)) {
+            throw new IllegalArgumentException("Target column not found in DataFrame");
+        }
+
+        List<Object> targets = data.get(targetColumn);
+
+        // Step 3: Iterate through each categorical column
+        for (String categoricalColumn : categoricalColumns) {
+
+            if (!data.containsKey(categoricalColumn)) {
+                throw new IllegalArgumentException("Column " + categoricalColumn + " not found in DataFrame");
+            }
+
+            List<Object> categories = data.get(categoricalColumn);
+
+            // Maps for sum and count per category
+            Map<Object, Double> sumMap = new HashMap<>();
+            Map<Object, Integer> countMap = new HashMap<>();
+
+            // Step 4: Compute sum and count for each category
+            for (int i = 0; i < categories.size(); i++) {
+                Object category = categories.get(i);
+                double targetValue = Double.valueOf(targets.get(i).toString());
+
+                sumMap.put(category, sumMap.getOrDefault(category, 0.0) + targetValue);
+                countMap.put(category, countMap.getOrDefault(category, 0) + 1);
+            }
+
+            // Step 5: Compute mean for each category
+            Map<Object, Double> meanMap = new HashMap<>();
+            for (Object category : sumMap.keySet()) {
+                double mean = sumMap.get(category) / countMap.get(category);
+                meanMap.put(category, mean);
+            }
+
+            // Step 6: Replace category values with encoded means
+            List<Object> encodedColumn = new ArrayList<>();
+            for (Object category : categories) {
+                encodedColumn.add(meanMap.get(category));
+            }
+
+            // Step 7: Add encoded column to dataset
+            data.put(categoricalColumn + "_TargetEncoded", encodedColumn);
+        }
+
+        // Step 8: Return new DataFrame with all encoded columns
+        return new DataFrame(data);
+    }
+
     
 }
+
+
