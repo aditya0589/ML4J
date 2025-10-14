@@ -151,6 +151,7 @@ public class DataFrame {
         return df;
     }
 
+    //updates the existing dataframe
     public void InPlaceRemoveColumn(String columnName) {
         if(!data.containsKey(columnName)) {
             throw new IllegalArgumentException("Column is not found in the dataframe");
@@ -159,6 +160,7 @@ public class DataFrame {
         }
     }
 
+    // makes a new dataframe 
     public DataFrame dropColumn(String columnName) {
         if(!data.containsKey(columnName)) {
             throw new IllegalArgumentException("Column name not found in dataframe");
