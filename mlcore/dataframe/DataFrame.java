@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
 
 public class DataFrame {
     protected Map<String, List<Object>> data;
@@ -216,6 +221,49 @@ public class DataFrame {
 
         return new DataFrame(merged);
     }
+
+// Converts the entire DataFrame to a 2D double array
+    public double[][] to2DArray() {
+        int rows = this.getCountRows();
+        int cols = this.getCountCols();
+        double[][] array = new double[rows][cols];
+
+        List<String> headers = new ArrayList<>(this.data.keySet());
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Object val = this.data.get(headers.get(j)).get(i);
+                if (val == null) {
+                    array[i][j] = 0.0; // or handle null differently
+                } else {
+                    array[i][j] = Double.valueOf(val.toString());
+                }
+            }
+        }
+        return array;
+    }
+
+    // Converts a single-column DataFrame to a 1D double array
+    public double[] to1DArray() {
+        if (this.getCountCols() != 1) {
+            throw new IllegalArgumentException("DataFrame must have exactly one column to convert to 1D array");
+        }
+        int rows = this.getCountRows();
+        double[] array = new double[rows];
+        String colName = this.data.keySet().iterator().next();
+        List<Object> values = this.data.get(colName);
+
+        for (int i = 0; i < rows; i++) {
+            Object val = values.get(i);
+            if (val == null) {
+                array[i] = 0.0; // or handle null differently
+            } else {
+                array[i] = Double.valueOf(val.toString());
+            }
+        }
+        return array;
+    }
+
 
 }
 
