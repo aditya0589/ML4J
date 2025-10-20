@@ -4,39 +4,38 @@ import mlcore.dataframe.DataFrame;
 
 public class Splitter {
     // Provide methods for dataframe splitting, like train test split
-    public Map<String, DataFrame> trainTestSplit(DataFrame df, double trainSize, long seed) {
-        // The method takes the input dataframe and devids it into two train and test data.
-        // However it does not seperate the target with the rest of the features.
-        int n = df.getCountRows();
-        List<Integer> allIndices = new ArrayList<>();
-        for(int i = 0; i < n; i++) {
-            allIndices.add(i);
-        }
-        int trainCount = (int)(n * trainSize);
+    public Map<String, DataFrame> trainTestSplit(DataFrame X, DataFrame y, double trainSize, int randomState) {
+        Map<String, DataFrame> split = new HashMap<>();
 
-        Random rand = new Random();
-        Set<Integer> trainIndicesSet = new HashSet<>();
-        while(trainIndicesSet.size() < trainCount) {
-            int index = rand.nextInt(n);
-            trainIndicesSet.add(index);
+        int totalRows = X.getCountRows();
+        int trainCount = (int) Math.round(totalRows * trainSize);
 
-        }
-        List<Integer> trainIndices = new ArrayList<>(trainIndicesSet);
-        List<Integer> testIndices = new ArrayList<>();
-
-        for(int i = 0; i < n; i++) {
-            if(! trainIndices.contains(i)) testIndices.add(i);
+        // Generate a list of indices
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < totalRows; i++) {
+            indices.add(i);
         }
 
-        DataFrame trainDF = getRowsByIndices(df, trainIndices);
-        DataFrame testDF = getRowsByIndices(df, testIndices);
+        // Shuffle with a fixed seed for reproducibility
+        Random random = new Random(randomState);
+        Collections.shuffle(indices, random);
 
-        Map<String, DataFrame> result = new HashMap<>();
-        result.put("train", trainDF);
-        result.put("test", testDF);
+        // Split indices into train/test
+        List<Integer> trainIndices = indices.subList(0, trainCount);
+        List<Integer> testIndices = indices.subList(trainCount, totalRows);
 
-        return result;
+        // Create train/test DataFrames
+        DataFrame X_train = X.selectRows(trainIndices);
+        DataFrame X_test = X.selectRows(testIndices);
+        DataFrame y_train = y.selectRows(trainIndices);
+        DataFrame y_test = y.selectRows(testIndices);
 
+        split.put("X_train", X_train);
+        split.put("X_test", X_test);
+        split.put("y_train", y_train);
+        split.put("y_test", y_test);
+
+        return split;
     }
     // obtain the Rows based on specified indices.
     public static DataFrame getRowsByIndices(DataFrame df, List<Integer> indices) {

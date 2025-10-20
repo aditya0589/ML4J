@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class KNeighbours extends Model {
+class KNeighbours extends Model {
     private int k;
     private double[][] trainFeatures;
     private int[] trainLabels;
@@ -57,46 +57,45 @@ public class KNeighbours extends Model {
         }
     }
 
-    @Override
+
     public DataFrame predict(DataFrame X) {
-        double[][] features = X.to2DArray();
-        int n = X.getCountRows();
-        int m = X.getCountCols();
+    double[][] features = X.to2DArray();
+    int n = X.getCountRows();
 
-        List<Object> predictions = new ArrayList<>();
+    List<Object> predictions = new ArrayList<>();
 
-        for(int i = 0; i < n; i++) {
-            // Compute distances to all training points
-            double[] distances = new double[trainFeatures.length];
-            for(int j = 0; j < trainFeatures.length; j++) {
-                distances[j] = euclideanDistance(features[i], trainFeatures[j]);
-            }
-
-            // Get indices of k nearest neighbors
-            int[] nearestIndices = getKNearestIndices(distances, k);
-
-            // Majority voting
-            Map<Integer, Integer> voteCount = new HashMap<>();
-            for(int idx: nearestIndices) {
-                voteCount.put(idx, voteCount.getOrDefault(idx, 0) + 1);
-            }
-
-            int maxVoteLabel = -1;
-            int maxVoteCount = -1;
-            for(Map.Entry<Integer, Integer> entry: voteCount.entrySet()) {
-                if(entry.getValue() > maxVoteCount) {
-                    maxVoteCount = entry.getValue();
-                    maxVoteLabel = entry.getKey();
-                }
-            }
-
-            predictions.add(labelMapping.get(maxVoteLabel));
+    for(int i = 0; i < n; i++) {
+        double[] distances = new double[trainFeatures.length];
+        for(int j = 0; j < trainFeatures.length; j++) {
+            distances[j] = euclideanDistance(features[i], trainFeatures[j]);
         }
 
-        Map<String, List<Object>> result = new LinkedHashMap<>();
-        result.put("Predictions", predictions);
-        return new DataFrame(result);
+        int[] nearestIndices = getKNearestIndices(distances, k);
+
+        Map<Integer, Integer> voteCount = new HashMap<>();
+        for(int idx: nearestIndices) {
+            int label = trainLabels[idx];
+            voteCount.put(label, voteCount.getOrDefault(label, 0) + 1);
+        }
+
+        int maxVoteLabel = -1;
+        int maxVoteCount = -1;
+        for(Map.Entry<Integer, Integer> entry: voteCount.entrySet()) {
+            if(entry.getValue() > maxVoteCount ||
+               (entry.getValue() == maxVoteCount && entry.getKey() < maxVoteLabel)) {
+                maxVoteCount = entry.getValue();
+                maxVoteLabel = entry.getKey();
+            }
+        }
+
+        predictions.add(labelMapping.get(maxVoteLabel));
     }
+
+    Map<String, List<Object>> result = new LinkedHashMap<>();
+    result.put("Predictions", predictions);
+    return new DataFrame(result);
+    }
+
 
     // Euclidean distance between two points
     private double euclideanDistance(double[] a, double[] b) {

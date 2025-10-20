@@ -4,10 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.LinkedHashMap;
 
 
 public class DataFrame {
@@ -262,6 +258,22 @@ public class DataFrame {
             }
         }
         return array;
+    }
+    public DataFrame selectRows(List<Integer> indices) {
+        Map<String, List<Object>> selected = new LinkedHashMap<>();
+
+        for (String col : this.data.keySet()) {
+            List<Object> column = this.data.get(col);
+            List<Object> newCol = new ArrayList<>();
+
+            for (int idx : indices) {
+                newCol.add(column.get(idx));
+            }
+
+            selected.put(col, newCol);
+        }
+
+        return new DataFrame(selected);
     }
 
 

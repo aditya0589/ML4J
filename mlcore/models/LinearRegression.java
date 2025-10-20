@@ -1,18 +1,18 @@
 package mlcore.models;
 
-import mlcore.dataframe.DataFrame;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import mlcore.dataframe.DataFrame;
 
 
 public class LinearRegression extends Model{
     
     private double[] weights;  // model coefficients (slope values)
     private double bias;       // intercept term
-    private double learningRate; 
-    private int epochs; 
+    final private double learningRate; 
+    final private int epochs; 
 
     public LinearRegression(double learningRate, int epochs) {
         this.learningRate = learningRate;
@@ -21,51 +21,51 @@ public class LinearRegression extends Model{
         this.weights = null; // will initialize in train() when you know feature count
     }
 
-    @Override
+
     public void train(DataFrame X, DataFrame y) {
-        int n = X.getCountRows();
-        int m = y.getCountCols();
+    int n = X.getCountRows();
+    int m = X.getCountCols();  // ✅ fixed
+    double[][] features = X.to2DArray();
+    double[] targets = y.to1DArray();
 
-        double[][] features = X.to2DArray();
-        double[] targets = y.to1DArray();
+    weights = new double[m];
+    bias = 0.0;
 
-        weights = new double[m];
-        bias = 0.0;
+    for (int epoch = 0; epoch < epochs; epoch++) {
+        double[] predictions = new double[n];
 
-        for(int epoch = 0; epoch < epochs; epoch++) {
-            double[] predictions = new double[n];
-
-            for(int i = 0; i < n; i++) {
-                double pred = bias;
-                for(int j = 0; j < m; j++) {
-                    pred += features[i][j] * weights[j];
-                }
-                predictions[i] = pred;
+        for (int i = 0; i < n; i++) {
+            double pred = bias;
+            for (int j = 0; j < m; j++) {
+                pred += features[i][j] * weights[j];
             }
+            predictions[i] = pred;
+        }
 
-            double[] dW = new double[m];
-            double db = 0.0;
+        double[] dW = new double[m];
+        double db = 0.0;
 
-            for(int i = 0; i < n; i++) {
-                double error = predictions[i] - targets[i];
-                for(int j = 0; j < m; j++) {
-                    dW[j] += features[i][j] * error;
-                }
-                db += error;
+        for (int i = 0; i < n; i++) {
+            double error = predictions[i] - targets[i];
+            for (int j = 0; j < m; j++) {
+                dW[j] += features[i][j] * error;
             }
+            db += error;
+        }
 
-            for(int j = 0; j < m; j++) {
-                dW[j] /= n;
-            }
-            db /= n;
+        for (int j = 0; j < m; j++) {
+            dW[j] /= n;
+        }
+        db /= n;
 
-            for(int j = 0; j < m; j++) {
-                weights[j] -= (learningRate * dW[j]);
-            }
-            bias -= (learningRate * db);
-
-        }  
+        // Update weights
+        for (int j = 0; j < m; j++) {
+            weights[j] -= learningRate * dW[j];
+        }
+        bias -= learningRate * db;
     }
+}
+
 
     @Override
     public DataFrame predict(DataFrame X) {

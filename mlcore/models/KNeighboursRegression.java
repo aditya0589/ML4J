@@ -1,15 +1,12 @@
 package mlcore.models;
 
-import mlcore.dataframe.DataFrame;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import mlcore.dataframe.DataFrame;
 
 public class KNeighboursRegression extends Model {
 
@@ -24,14 +21,11 @@ public class KNeighboursRegression extends Model {
     @Override
     public void train(DataFrame X, DataFrame y) {
         int n = X.getCountRows();
-        int m = X.getCountCols();
-
         trainFeatures = X.to2DArray();
 
-        // Convert target column to double array
-        List<Object> targetList = y.getColumn(
-                y.getData().keySet().iterator().next()
-        ).getData().values().iterator().next();
+        // Get target column name
+        String targetCol = y.getData().keySet().iterator().next();
+        List<Object> targetList = y.getData().get(targetCol);
 
         trainTargets = new double[n];
         for (int i = 0; i < n; i++) {
@@ -43,7 +37,6 @@ public class KNeighboursRegression extends Model {
     public DataFrame predict(DataFrame X) {
         double[][] features = X.to2DArray();
         int n = X.getCountRows();
-        int m = X.getCountCols();
 
         List<Object> predictions = new ArrayList<>();
 
@@ -60,8 +53,8 @@ public class KNeighboursRegression extends Model {
             for (int idx : nearestIndices) {
                 sum += trainTargets[idx];
             }
-            double pred = sum / k;
-            predictions.add(pred);
+
+            predictions.add(sum / k);  // Average of k nearest targets
         }
 
         Map<String, List<Object>> result = new LinkedHashMap<>();
@@ -88,4 +81,3 @@ public class KNeighboursRegression extends Model {
         return nearest;
     }
 }
-
