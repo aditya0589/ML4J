@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.Arrays;
 import java.util.Comparator;
 
-class KNeighbours extends Model {
+public class KNeighboursClassification extends Model {
     private int k;
     private double[][] trainFeatures;
     private int[] trainLabels;
