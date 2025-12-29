@@ -1,9 +1,16 @@
 package mlcore.dataframe;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 
 public class DataFrame {
@@ -61,14 +68,92 @@ public class DataFrame {
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(delimiter);
                 for (int i = 0; i < headers.length; i++) {
-                    String val = values[i].trim();
+                    String val = (i < values.length) ? values[i].trim() : ""; // Handle missing trailing values
                     Object parsedVal = parseValue(val);
                     csvData.get(headers[i]).add(parsedVal);
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
         }
         return new DataFrame(csvData);
+    }
+
+    public static DataFrame readJSON(String filePath) {
+        Map<String, List<Object>> dataframeData = new LinkedHashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            List<Map<String, Object>> jsonData = mapper.readValue(new File(filePath), new TypeReference<List<Map<String, Object>>>(){});
+            
+            if (jsonData.isEmpty()) return new DataFrame();
+
+            // Initialize columns from the first object
+            Set<String> keys = jsonData.get(0).keySet();
+            for (String key : keys) {
+                dataframeData.put(key, new ArrayList<>());
+            }
+
+            // Populate data
+            for (Map<String, Object> row : jsonData) {
+                for (String key : keys) {
+                    dataframeData.get(key).add(row.get(key));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new DataFrame(dataframeData);
+    }
+
+    public static DataFrame readExcel(String filePath) {
+        Map<String, List<Object>> excelData = new LinkedHashMap<>();
+        try (FileInputStream fis = new FileInputStream(new File(filePath));
+             Workbook workbook = new XSSFWorkbook(fis)) {
+            
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            if (!rowIterator.hasNext()) return new DataFrame();
+
+            // Step 1: Get headers from first row
+            Row headerRow = rowIterator.next();
+            List<String> headers = new ArrayList<>();
+            for (Cell cell : headerRow) {
+                headers.add(cell.getStringCellValue());
+                excelData.put(cell.getStringCellValue(), new ArrayList<>());
+            }
+
+            // Step 2: Read data rows
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                for (int i = 0; i < headers.size(); i++) {
+                    Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    Object val = null;
+                    switch (cell.getCellType()) {
+                        case STRING:
+                            val = parseValue(cell.getStringCellValue());
+                            break;
+                        case NUMERIC:
+                             if (DateUtil.isCellDateFormatted(cell)) {
+                                val = cell.getDateCellValue();
+                            } else {
+                                val = cell.getNumericCellValue();
+                            }
+                            break;
+                        case BOOLEAN:
+                            val = cell.getBooleanCellValue();
+                            break;
+                        default:
+                            val = "";
+                    }
+                    excelData.get(headers.get(i)).add(val);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new DataFrame(excelData);
     }
     
     private static Object parseValue(String val) {
